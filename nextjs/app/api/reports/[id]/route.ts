@@ -27,7 +27,7 @@ export async function GET(
       return NextResponse.json({ error: "Report not found" }, { status: 404 });
     }
 
-    if (report.paymentStatus !== "paid") {
+    if (report.paymentStatus !== "paid" && report.paymentStatus !== "test") {
       return NextResponse.json({
         id: report.id,
         email: report.email,

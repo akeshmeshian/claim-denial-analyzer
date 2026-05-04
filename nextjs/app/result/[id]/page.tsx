@@ -21,7 +21,7 @@ export default async function ResultPage({ params }: Props) {
 
   if (!report) notFound();
 
-  if (report.paymentStatus !== "paid") {
+  if (report.paymentStatus !== "paid" && report.paymentStatus !== "test") {
     return (
       <ResultPreview
         reportId={id}
