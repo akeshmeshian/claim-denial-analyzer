@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { db, reportsTable, paymentsTable } from "@/lib/db";
 import { eq } from "drizzle-orm";
 
+export const maxDuration = 30;
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-02-24.acacia",
 });
