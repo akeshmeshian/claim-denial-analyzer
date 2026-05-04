@@ -1,0 +1,235 @@
+Build a production-ready MVP web app called “Claim Denial Analyzer.”
+
+Purpose:
+Users upload an insurance denial letter and insurance policy PDF. The app extracts the text, analyzes the denial using OpenAI, and generates a structured educational report with possible coverage arguments, policy citations, weaknesses, and a draft message to the insurer.
+
+Use this stack:
+- Next.js with TypeScript
+- Tailwind CSS
+- Supabase for database, auth, and file storage
+- Stripe Checkout for payments
+- OpenAI API for analysis
+- PDF text extraction library for uploaded PDFs
+- Deployable to Vercel
+
+Important legal positioning:
+This is NOT legal advice, NOT insurance advice, and NOT a substitute for a licensed attorney, public adjuster, or insurance professional. Display this disclaimer on the landing page, upload page, checkout page, and report page.
+
+Core pages:
+
+1. Landing Page
+Create a modern, clean homepage with:
+- Hero headline: “Insurance Claim Denied? Get an AI-Powered Coverage Review in Minutes.”
+- Subheadline: “Upload your denial letter and policy to receive possible coverage arguments, policy language references, weaknesses, and a draft response.”
+- CTA button: “Analyze My Denial”
+- How it works section:
+  1. Upload your denial letter
+  2. Upload your insurance policy
+  3. Get a structured claim denial report
+- Pricing section:
+  - Launch price: $29 per full report
+- Disclaimer section
+- FAQ section
+
+2. Upload Page
+Create a form where user enters:
+- Email address
+- Claim type dropdown:
+  - Homeowners
+  - Auto
+  - Health
+  - Commercial Property
+  - General Liability
+  - Other
+- Short claim description text box
+- Upload denial letter PDF
+- Upload policy PDF
+- Checkbox agreeing to disclaimer
+- Button: “Generate Preview”
+
+File requirements:
+- Accept PDF only
+- Max 25MB each
+- Show upload progress
+- Validate required files
+- Store files securely in Supabase Storage
+
+3. Preview Page
+After upload and analysis, show a limited preview:
+- Denial Summary
+- 1 possible coverage issue teaser
+- Blur or lock the rest
+- Button: “Unlock Full Report for $29”
+
+4. Payment
+Use Stripe Checkout.
+After successful payment, redirect user to full report page.
+Store payment status in Supabase.
+
+5. Full Report Page
+Display the full structured report with:
+- Denial Summary
+- Key Policy Language Found
+- Possible Coverage Arguments
+- Exclusions or Limitations the Insurer May Rely On
+- Weaknesses or Missing Information
+- Questions to Ask the Adjuster
+- Draft Message to the Insurance Company
+- Final Disclaimer
+
+Add button:
+- “Download Report as PDF”
+
+Database:
+Create Supabase tables:
+
+Table: reports
+Fields:
+- id UUID primary key
+- email text
+- claim_type text
+- claim_description text
+- denial_file_url text
+- policy_file_url text
+- denial_text text
+- policy_text text
+- ai_preview jsonb
+- ai_full_report jsonb
+- payment_status text default 'unpaid'
+- stripe_session_id text
+- created_at timestamp
+
+Table: payments
+Fields:
+- id UUID primary key
+- report_id UUID
+- stripe_session_id text
+- amount integer
+- currency text
+- status text
+- created_at timestamp
+
+OpenAI behavior:
+Create an API route /api/analyze that:
+1. Receives report ID
+2. Extracts text from the denial letter PDF
+3. Extracts text from the policy PDF
+4. Sends the extracted text to OpenAI
+5. Saves preview and full report to Supabase
+6. Returns preview to user
+
+AI prompt:
+Use this exact prompt structure:
+
+“You are an insurance document analysis assistant.
+
+You are analyzing an insurance denial letter and insurance policy for educational purposes only.
+
+Rules:
+- Only use the denial letter and policy text provided.
+- Do not invent policy language.
+- Do not claim something is covered unless the provided policy language supports the possibility.
+- If policy wording is missing, unclear, or incomplete, say so.
+- Do not give legal advice.
+- Do not tell the user they definitely have coverage.
+- Use cautious language such as ‘possible argument,’ ‘may support,’ ‘could be relevant,’ and ‘needs review.’
+- Cite exact wording from the uploaded policy whenever possible.
+- Identify both strengths and weaknesses.
+- Write in plain English.
+
+User claim type:
+[claim_type]
+
+User claim description:
+[claim_description]
+
+Denial letter text:
+[denial_text]
+
+Policy text:
+[policy_text]
+
+Return JSON with this structure:
+{
+  "denial_summary": "",
+  "key_policy_language": [
+    {
+      "quote": "",
+      "why_it_matters": ""
+    }
+  ],
+  "possible_coverage_arguments": [
+    {
+      "title": "",
+      "argument": "",
+      "supporting_policy_language": "",
+      "strength_level": "Weak / Moderate / Strong"
+    }
+  ],
+  "insurer_exclusions_or_limitations": [
+    {
+      "issue": "",
+      "why_it_may_hurt_the_claim": ""
+    }
+  ],
+  "weaknesses_or_missing_information": [
+    ""
+  ],
+  "questions_to_ask_adjuster": [
+    ""
+  ],
+  "draft_message_to_insurer": "",
+  "educational_disclaimer": "This report is educational document analysis only. It is not legal advice, insurance advice, or a substitute for a licensed attorney, public adjuster, or insurance professional."
+}”
+
+Important:
+If PDF text is too long for one OpenAI request, chunk the policy text and first identify relevant sections, then use only the relevant sections for the final analysis.
+
+Security:
+- Store API keys only in environment variables
+- Do not expose OpenAI, Stripe, or Supabase service role keys to frontend
+- Validate file type and file size
+- Sanitize user input
+- Use server-side API routes for OpenAI and Stripe
+- Use Supabase Row Level Security if auth is implemented
+
+Environment variables needed:
+- OPENAI_API_KEY
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY
+- STRIPE_SECRET_KEY
+- STRIPE_WEBHOOK_SECRET
+- NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+- NEXT_PUBLIC_SITE_URL
+
+Admin:
+Create a basic admin page protected by a simple ADMIN_PASSWORD env variable where I can see:
+- report ID
+- email
+- claim type
+- payment status
+- created date
+- link to report
+
+Design:
+- Clean, trustworthy, modern
+- Use blue/white/gray color palette
+- Mobile responsive
+- Professional, not gimmicky
+- Use cards, clean spacing, and clear CTAs
+
+Branding:
+Use temporary name: “Claim Denial Analyzer”
+Domain will likely be FightClaimDenials.com or GetDeniedClaimHelp.com, so make branding easy to change later.
+
+Deliverables:
+- Fully working Next.js app
+- Working upload flow
+- Working PDF text extraction
+- Working OpenAI analysis
+- Working Stripe Checkout test mode
+- Working report preview and full report unlock
+- README with setup steps
+- Instructions for deploying to Vercel
+- Instructions for connecting Supabase and Stripe
