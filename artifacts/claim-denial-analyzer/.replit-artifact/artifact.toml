@@ -11,21 +11,24 @@ version = "1.0.0"
 
 [[services]]
 name = "web"
-paths = [ "/" ]
+paths = ["/"]
 localPort = 19740
 
 [services.development]
-run = "pnpm --filter @workspace/claim-denial-analyzer run dev"
+run = "bash -c 'cd /home/runner/workspace/nextjs && PORT=19740 pnpm dev'"
 
-[services.production]
-build = [ "pnpm", "--filter", "@workspace/claim-denial-analyzer", "run", "build" ]
-publicDir = "artifacts/claim-denial-analyzer/dist/public"
-serve = "static"
+[services.production.build]
+args = ["bash", "-c", "cd /home/runner/workspace/nextjs && pnpm install --ignore-workspace && pnpm build"]
 
-[[services.production.rewrites]]
-from = "/*"
-to = "/index.html"
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["bash", "-c", "cd /home/runner/workspace/nextjs && pnpm start"]
+
+[services.production.run.env]
+PORT = "19740"
+NODE_ENV = "production"
 
 [services.env]
 PORT = "19740"
-BASE_PATH = "/"
